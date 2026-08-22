@@ -1,0 +1,14 @@
+# 架空のサービス「ソライロペイ」を題材にしたサンプルです。実在の企業・サービスとは関係ありません。
+description: チャットでのカスタマーサポート
+constraints:
+  - id: url_ok
+    text: URLはそのまま貼ってよい
+  - id: numbered_steps
+    text: 手順は番号付きの箇条書きにする
+  - id: short_messages
+    text: 1メッセージは3行以内を目安に短くする
+  - id: split_long_replies
+    text: 長い説明は複数のメッセージに分けて送る
+formatting:
+  リンク: URLはそのままの形式で貼り付ける
+  強調: 重要な指示は行頭に「※」を付ける

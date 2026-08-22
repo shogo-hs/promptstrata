@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  # 版が食い違ったまま公開しないための門番。ここが落ちれば PyPI には何も上がらない。
+  version:
+    name: タグと版の突き合わせ
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: タグ・pyproject.toml・CHANGELOG.md が同じ版を指しているか
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION=$(grep -m1 '^version = ' pyproject.toml | cut -d'"' -f2)
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "::error::タグ v$TAG と pyproject.toml の version $VERSION が食い違っている" >&2
+            exit 1
+          fi
+          if ! grep -q "^## \\[$VERSION\\]" CHANGELOG.md; then
+            echo "::error::CHANGELOG.md に [$VERSION] の節が無い" >&2
+            exit 1
+          fi
+          echo "タグ・pyproject.toml・CHANGELOG.md がいずれも $VERSION"
+
+  check:
+    needs: version
+    name: check (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python-version }}
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy src
+      - run: uv run pytest -q
+
+  publish:
+    name: build and publish to PyPI
+    needs: check
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv build
+      - uses: pypa/gh-action-pypi-publish@release/v1
