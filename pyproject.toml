@@ -24,6 +24,12 @@ dependencies = [
 [project.scripts]
 promptstrata = "promptstrata.cli:main"
 
+[project.urls]
+Homepage = "https://github.com/shogo-hs/promptstrata"
+Repository = "https://github.com/shogo-hs/promptstrata"
+Changelog = "https://github.com/shogo-hs/promptstrata/blob/main/CHANGELOG.md"
+Issues = "https://github.com/shogo-hs/promptstrata/issues"
+
 [dependency-groups]
 dev = [
     "pytest>=8.0",
